@@ -13,6 +13,7 @@
 #include "comm/bt_lock.h"
 
 #include "kernel/event_loop.h"
+#include "pbl/services/bluetooth/ble_hrm.h"
 #include "pbl/services/bluetooth/bluetooth_persistent_storage.h"
 #include "pbl/services/regular_timer.h"
 #include "util/size.h"
@@ -187,7 +188,12 @@ unlock:
 static RegularTimerInfo s_hrm_reconnect_timer;
 
 static void prv_hrm_reconnect_timeout_kernel_main_callback(void *data) {
-  gap_le_slave_reconnect_hrm_stop();
+  if (ble_hrm_is_supported_and_enabled()) {
+    // HRM sharing is still enabled, keep advertising so fitness apps can find us.
+    gap_le_slave_reconnect_hrm_restart();
+  } else {
+    gap_le_slave_reconnect_hrm_stop();
+  }
 }
 
 static void prv_hrm_reconnect_timeout_timer_callback(void *data) {

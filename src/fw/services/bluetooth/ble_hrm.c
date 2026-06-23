@@ -120,8 +120,12 @@ void ble_hrm_handle_activity_prefs_heart_rate_is_enabled(bool is_enabled) {
   }
   PBL_LOG_INFO("BLE HRM sharing prefs updated: is_enabled=%u", is_enabled);
 
-  if (!is_enabled) {
+  if (is_enabled) {
+    // Start advertising with the HR service UUID so fitness apps can discover us.
+    gap_le_slave_reconnect_hrm_restart();
+  } else {
     prv_reset_subscriptions();
+    gap_le_slave_reconnect_hrm_stop();
   }
   bt_driver_hrm_service_enable(is_enabled);
 }
@@ -447,6 +451,11 @@ void ble_hrm_handle_disconnection(GAPLEConnection *connection) {
 void ble_hrm_init(void) {
   s_ble_hrm_is_inited = true;
   s_ble_hrm_timer = (RegularTimerInfo) {};
+
+  // Kick off HRM advertising — prefs loading bypasses the normal callback path.
+  if (ble_hrm_is_supported_and_enabled()) {
+    gap_le_slave_reconnect_hrm_restart();
+  }
 }
 
 void ble_hrm_deinit(void) {
