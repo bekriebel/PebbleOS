@@ -68,7 +68,7 @@ static bool prv_hw_and_sw_supports_hrm(void) {
 
 bool ble_hrm_is_supported_and_enabled(void) {
   return (prv_hw_and_sw_supports_hrm() &&
-          activity_prefs_heart_rate_is_enabled());
+          activity_prefs_ble_hrm_sharing_is_enabled());
 }
 
 static void prv_reset_subscriptions(void);
